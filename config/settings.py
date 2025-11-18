@@ -9,6 +9,9 @@ load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 
+STRIPE_API_KEY = os.getenv("STRIPE_API_KEY")
+STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")
+
 DEBUG = True
 
 ALLOWED_HOSTS = []
