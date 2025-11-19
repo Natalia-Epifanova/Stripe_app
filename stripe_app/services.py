@@ -1,7 +1,59 @@
 import stripe
 from django.conf import settings
 
-stripe.api_key = settings.STRIPE_API_KEY
+
+def get_stripe_keys(currency):
+    """
+    Возвращает Stripe ключи для указанной валюты.
+
+    Args:
+        currency (str): Код валюты ('usd' или 'eur')
+
+    Returns:
+        dict: Словарь с public и secret ключами
+    """
+    keys = {
+        "usd": {
+            "public": settings.STRIPE_PUBLIC_KEY_USD,
+            "secret": settings.STRIPE_SECRET_KEY_USD,
+        },
+        "eur": {
+            "public": settings.STRIPE_PUBLIC_KEY_EUR,
+            "secret": settings.STRIPE_SECRET_KEY_EUR,
+        },
+    }
+
+    return keys.get(currency.lower(), keys["usd"])
+
+
+def get_stripe_api_key(currency):
+    """
+    Возвращает секретный ключ Stripe для указанной валюты.
+
+    Args:
+        currency (str): Код валюты
+
+    Returns:
+        str: Секретный ключ Stripe
+    """
+    return get_stripe_keys(currency)["secret"]
+
+
+def get_stripe_public_key(currency):
+    """
+    Возвращает публичный ключ Stripe для указанной валюты.
+
+    Args:
+        currency (str): Код валюты
+
+    Returns:
+        str: Публичный ключ Stripe
+    """
+    # 👇 ДОБАВЬ ОТЛАДКУ
+    keys = get_stripe_keys(currency)
+    public_key = keys["public"]
+    print(f"DEBUG: Currency: {currency}, Public Key: {public_key}")
+    return get_stripe_keys(currency)["public"]
 
 
 def create_stripe_price_for_item(item):

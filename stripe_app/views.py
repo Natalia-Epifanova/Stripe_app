@@ -2,11 +2,12 @@ import stripe
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 
-from config.settings import STRIPE_API_KEY, STRIPE_PUBLIC_KEY
 from stripe_app.models import Item, Order
-from stripe_app.services import create_stripe_price_for_item
-
-stripe.api_key = STRIPE_API_KEY
+from stripe_app.services import (
+    create_stripe_price_for_item,
+    get_stripe_public_key,
+    get_stripe_api_key,
+)
 
 
 def item_detail(request, item_id):
@@ -21,10 +22,11 @@ def item_detail(request, item_id):
         HttpResponse: HTML страница с информацией о товаре
     """
     item = get_object_or_404(Item, id=item_id)
+    stripe_public_key = get_stripe_public_key(item.currency)
     return render(
         request,
         "stripe_app/item_detail.html",
-        {"item": item, "STRIPE_PUBLIC_KEY": STRIPE_PUBLIC_KEY},
+        {"item": item, "STRIPE_PUBLIC_KEY": stripe_public_key},
     )
 
 
@@ -40,6 +42,7 @@ def create_checkout_session(request, item_id):
         JsonResponse: Объект с sessionId для редиректа на Stripe Checkout или ошибкой
     """
     item = get_object_or_404(Item, id=item_id)
+    stripe.api_key = get_stripe_api_key(item.currency)
 
     try:
         price_id = create_stripe_price_for_item(item)
@@ -73,11 +76,12 @@ def order_detail(request, order_id):
         HttpResponse: HTML страница с информацией о заказе
     """
     order = get_object_or_404(Order, id=order_id)
+    stripe_public_key = get_stripe_public_key(order.currency)
     order.calc_total_price()
     return render(
         request,
         "stripe_app/order_detail.html",
-        {"order": order, "STRIPE_PUBLIC_KEY": STRIPE_PUBLIC_KEY},
+        {"order": order, "STRIPE_PUBLIC_KEY": stripe_public_key},
     )
 
 
@@ -95,6 +99,7 @@ def create_order_checkout_session(request, order_id):
         JsonResponse: Объект с sessionId для редиректа на Stripe Checkout или ошибкой
     """
     order = get_object_or_404(Order, id=order_id)
+    stripe.api_key = get_stripe_api_key(order.currency)
     order.calc_total_price()
 
     try:
@@ -149,10 +154,11 @@ def payment_intent_page(request, item_id):
         HttpResponse: HTML страница с кастомной платежной формой Stripe
     """
     item = get_object_or_404(Item, id=item_id)
+    stripe_public_key = get_stripe_public_key(item.currency)
     return render(
         request,
         "stripe_app/payment_intent_page.html",
-        {"item": item, "STRIPE_PUBLIC_KEY": STRIPE_PUBLIC_KEY},
+        {"item": item, "STRIPE_PUBLIC_KEY": stripe_public_key},
     )
 
 
@@ -168,6 +174,7 @@ def create_payment_intent(request, item_id):
         JsonResponse: Объект с clientSecret для инициализации Stripe Elements или ошибкой
     """
     item = get_object_or_404(Item, id=item_id)
+    stripe.api_key = get_stripe_api_key(item.currency)
     try:
         intent = stripe.PaymentIntent.create(
             amount=int(item.price * 100),
@@ -192,11 +199,12 @@ def order_payment_intent_page(request, order_id):
         HttpResponse: HTML страница с кастомной платежной формой Stripe для заказа
     """
     order = get_object_or_404(Order, id=order_id)
+    stripe_public_key = get_stripe_public_key(order.currency)
     order.calc_total_price()
     return render(
         request,
         "stripe_app/order_payment_intent_page.html",
-        {"order": order, "STRIPE_PUBLIC_KEY": STRIPE_PUBLIC_KEY},
+        {"order": order, "STRIPE_PUBLIC_KEY": stripe_public_key},
     )
 
 
@@ -212,12 +220,13 @@ def create_order_payment_intent(request, order_id):
         JsonResponse: Объект с clientSecret для инициализации Stripe Elements или ошибкой
     """
     order = get_object_or_404(Order, id=order_id)
+    stripe.api_key = get_stripe_api_key(order.currency)
     order.calc_total_price()
 
     try:
         intent = stripe.PaymentIntent.create(
             amount=int(order.total_price * 100),
-            currency="usd",
+            currency=order.currency,
             metadata={"order_id": order.id, "type": "order"},
             automatic_payment_methods={
                 "enabled": True,
