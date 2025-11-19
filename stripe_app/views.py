@@ -10,7 +10,16 @@ stripe.api_key = STRIPE_API_KEY
 
 
 def item_detail(request, item_id):
-    """Страница элемента"""
+    """
+    Отображает страницу с информацией о товаре и кнопкой для оплаты через Stripe Checkout.
+
+    Args:
+        request: HTTP запрос
+        item_id (int): ID товара
+
+    Returns:
+        HttpResponse: HTML страница с информацией о товаре
+    """
     item = get_object_or_404(Item, id=item_id)
     return render(
         request,
@@ -20,7 +29,16 @@ def item_detail(request, item_id):
 
 
 def create_checkout_session(request, item_id):
-    """Создание сессии для одного товара"""
+    """
+    Создает Stripe Checkout Session для оплаты одного товара.
+
+    Args:
+        request: HTTP запрос
+        item_id (int): ID товара
+
+    Returns:
+        JsonResponse: Объект с sessionId для редиректа на Stripe Checkout или ошибкой
+    """
     item = get_object_or_404(Item, id=item_id)
 
     try:
@@ -44,7 +62,16 @@ def create_checkout_session(request, item_id):
 
 
 def order_detail(request, order_id):
-    """Страница заказа"""
+    """
+    Отображает страницу с информацией о заказе и кнопкой для оплаты через Stripe Checkout.
+
+    Args:
+        request: HTTP запрос
+        order_id (int): ID заказа
+
+    Returns:
+        HttpResponse: HTML страница с информацией о заказе
+    """
     order = get_object_or_404(Order, id=order_id)
     order.calc_total_price()
     return render(
@@ -55,7 +82,18 @@ def order_detail(request, order_id):
 
 
 def create_order_checkout_session(request, order_id):
-    """Создание сессии для товаров из заказа"""
+    """
+    Создает Stripe Checkout Session для оплаты заказа с несколькими товарами.
+
+    Поддерживает применение скидок и налогов к заказу.
+
+    Args:
+        request: HTTP запрос
+        order_id (int): ID заказа
+
+    Returns:
+        JsonResponse: Объект с sessionId для редиректа на Stripe Checkout или ошибкой
+    """
     order = get_object_or_404(Order, id=order_id)
     order.calc_total_price()
 
@@ -100,7 +138,16 @@ def create_order_checkout_session(request, order_id):
 
 
 def payment_intent_page(request, item_id):
-    """Страница для оплаты одного элемента через Payment Intent"""
+    """
+    Отображает страницу для оплаты одного товара через Stripe Payment Intent.
+
+    Args:
+        request: HTTP запрос
+        item_id (int): ID товара
+
+    Returns:
+        HttpResponse: HTML страница с кастомной платежной формой Stripe
+    """
     item = get_object_or_404(Item, id=item_id)
     return render(
         request,
@@ -110,7 +157,16 @@ def payment_intent_page(request, item_id):
 
 
 def create_payment_intent(request, item_id):
-    """Создание Payment Intent для одного элемента"""
+    """
+    Создает Stripe Payment Intent для оплаты одного товара.
+
+    Args:
+        request: HTTP запрос
+        item_id (int): ID товара
+
+    Returns:
+        JsonResponse: Объект с clientSecret для инициализации Stripe Elements или ошибкой
+    """
     item = get_object_or_404(Item, id=item_id)
     try:
         intent = stripe.PaymentIntent.create(
@@ -125,7 +181,16 @@ def create_payment_intent(request, item_id):
 
 
 def order_payment_intent_page(request, order_id):
-    """Страница для оплаты заказа через Payment Intent"""
+    """
+    Отображает страницу для оплаты заказа через Stripe Payment Intent.
+
+    Args:
+        request: HTTP запрос
+        order_id (int): ID заказа
+
+    Returns:
+        HttpResponse: HTML страница с кастомной платежной формой Stripe для заказа
+    """
     order = get_object_or_404(Order, id=order_id)
     order.calc_total_price()
     return render(
@@ -136,7 +201,16 @@ def order_payment_intent_page(request, order_id):
 
 
 def create_order_payment_intent(request, order_id):
-    """Создание Payment Intent для заказа"""
+    """
+    Создает Stripe Payment Intent для оплаты заказа с общей стоимостью.
+
+    Args:
+        request: HTTP запрос
+        order_id (int): ID заказа
+
+    Returns:
+        JsonResponse: Объект с clientSecret для инициализации Stripe Elements или ошибкой
+    """
     order = get_object_or_404(Order, id=order_id)
     order.calc_total_price()
 

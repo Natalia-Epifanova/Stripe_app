@@ -7,7 +7,10 @@ from .services import create_stripe_coupon, create_stripe_tax
 @receiver(post_save, sender=Discount)
 def create_stripe_coupon_signal(sender, instance, created, **kwargs):
     """
-    Автоматически создает купон в Stripe при создании Discount
+    Сигнал для автоматического создания купона в Stripe при создании Discount.
+
+    Срабатывает после сохранения модели Discount и создает соответствующий купон в Stripe,
+    сохраняя его ID в поле stripe_coupon_id.
     """
     if created and not instance.stripe_coupon_id:
         coupon_id = create_stripe_coupon(instance)
@@ -18,7 +21,10 @@ def create_stripe_coupon_signal(sender, instance, created, **kwargs):
 @receiver(post_save, sender=Tax)
 def create_stripe_tax_signal(sender, instance, created, **kwargs):
     """
-    Автоматически создает tax rate в Stripe при создании Tax
+    Сигнал для автоматического создания налоговой ставки в Stripe при создании Tax.
+
+    Срабатывает после сохранения модели Tax и создает соответствующую налоговую ставку в Stripe,
+    сохраняя ее ID в поле stripe_tax_id.
     """
     if created and not instance.stripe_tax_id:
         tax_id = create_stripe_tax(instance)
@@ -29,7 +35,10 @@ def create_stripe_tax_signal(sender, instance, created, **kwargs):
 @receiver(m2m_changed, sender=Order.items.through)
 def update_order_total(sender, instance, action, **kwargs):
     """
-    Автоматически пересчитывает общую стоимость при изменении товаров в заказе
+    Сигнал для автоматического пересчета общей стоимости заказа при изменении состава товаров.
+
+    Срабатывает при добавлении, удалении или очистке товаров в заказе и вызывает
+    пересчет общей стоимости с учетом скидок и налогов.
     """
     if action in ["post_add", "post_remove", "post_clear"]:
         instance.calc_total_price()

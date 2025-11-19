@@ -4,6 +4,16 @@ from django.db import models
 
 
 class Item(models.Model):
+    """
+    Модель товара с информацией о названии, описании, цене и валюте.
+
+    Attributes:
+        name (str): Название товара
+        description (str): Описание товара (опционально)
+        price (Decimal): Цена товара
+        currency (str): Валюта товара (USD или EUR)
+    """
+
     name = models.CharField(
         max_length=100,
         verbose_name="Название элемента",
@@ -33,6 +43,16 @@ class Item(models.Model):
 
 
 class Order(models.Model):
+    """
+    Модель заказа, объединяющая несколько товаров с возможностью применения скидок и налогов.
+
+    Attributes:
+        items (ManyToManyField): Товары в заказе
+        total_price (Decimal): Общая стоимость заказа после применения скидок и налогов
+        discount (ForeignKey): Примененная скидка (опционально)
+        tax (ForeignKey): Примененный налог (опционально)
+    """
+
     items = models.ManyToManyField(Item, verbose_name="Элементы в заказе")
     total_price = models.DecimalField(
         max_digits=10,
@@ -58,9 +78,16 @@ class Order(models.Model):
 
     @property
     def currency(self):
+        """Возвращает валюту заказа (по умолчанию USD)."""
         return "usd"
 
     def calc_total_price(self):
+        """
+        Рассчитывает общую стоимость заказа с учетом скидок и налогов.
+
+        Returns:
+            Decimal: Общая стоимость заказа после всех расчетов
+        """
         total = 0
         for item in self.items.all():
             if item.currency == "usd":
@@ -84,6 +111,15 @@ class Order(models.Model):
 
 
 class Discount(models.Model):
+    """
+    Модель скидки/купона для применения к заказам.
+
+    Attributes:
+        name (str): Название скидки
+        percent (Decimal): Процент скидки
+        stripe_coupon_id (str): ID купона в Stripe (создается автоматически)
+    """
+
     name = models.CharField(
         max_length=100,
         verbose_name="Название скидки/купона",
@@ -108,6 +144,15 @@ class Discount(models.Model):
 
 
 class Tax(models.Model):
+    """
+    Модель налога для применения к заказам.
+
+    Attributes:
+        name (str): Название налога
+        percent (Decimal): Процент налога
+        stripe_tax_id (str): ID налога в Stripe (создается автоматически)
+    """
+
     name = models.CharField(
         max_length=100,
         verbose_name="Название налога",

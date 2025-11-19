@@ -6,8 +6,13 @@ stripe.api_key = settings.STRIPE_API_KEY
 
 def create_stripe_price_for_item(item):
     """
-    Создает продукт и цену в Stripe для Item
-    Возвращает price_id
+    Создает продукт и цену в Stripe для указанного товара.
+
+    Args:
+        item (Item): Объект товара Django
+
+    Returns:
+        str: ID созданной цены в Stripe или None в случае ошибки
     """
     try:
         product = stripe.Product.create(name=item.name)
@@ -24,7 +29,15 @@ def create_stripe_price_for_item(item):
 
 
 def create_stripe_coupon(discount_instance):
-    """Создает купон в Stripe для модели Discount"""
+    """
+    Создает купон в Stripe на основе модели Discount.
+
+    Args:
+        discount_instance (Discount): Объект скидки Django
+
+    Returns:
+        str: ID созданного купона в Stripe или None в случае ошибки
+    """
     try:
         coupon = stripe.Coupon.create(
             duration="forever",
@@ -38,7 +51,15 @@ def create_stripe_coupon(discount_instance):
 
 
 def create_stripe_tax(tax_instance):
-    """Создает tax rate в Stripe для модели Tax"""
+    """
+    Создает налоговую ставку в Stripe на основе модели Tax.
+
+    Args:
+        tax_instance (Tax): Объект налога Django
+
+    Returns:
+        str: ID созданной налоговой ставки в Stripe или None в случае ошибки
+    """
     try:
         tax_rate = stripe.TaxRate.create(
             display_name=tax_instance.name,
