@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Buy {{ item.name }}</title>
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+    <h1>{{ item.name }}</h1>
+    <p>Price: {{ item.price }} {{ item.currency|upper }}</p>
+
+    <div id="payment-element"></div>
+    <button id="pay-button">Pay now</button>
+    <div id="error-message"></div>
+
+    <script>
+        const stripe = Stripe('{{ STRIPE_PUBLIC_KEY }}');
+
+        fetch('/stripe_app/create-payment-intent/{{ item.id }}/')
+        .then(response => response.json())
+        .then(data => {
+            const elements = stripe.elements({ clientSecret: data.clientSecret });
+            const paymentElement = elements.create('payment');
+            paymentElement.mount('#payment-element');
+
+            document.getElementById('pay-button').onclick = async () => {
+                const { error } = await stripe.confirmPayment({
+                    elements,
+                    confirmParams: {
+                        return_url: window.location.origin + '/stripe_app/item/' + {{ item.id }} + '/',
+                    },
+                });
+                if (error) document.getElementById('error-message').textContent = error.message;
+            };
+        });
+    </script>
+</body>
+</html>

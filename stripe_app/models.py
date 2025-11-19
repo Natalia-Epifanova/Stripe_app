@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import models
 
 
@@ -54,8 +56,17 @@ class Order(models.Model):
         verbose_name="Налог",
     )
 
+    @property
+    def currency(self):
+        return "usd"
+
     def calc_total_price(self):
-        total = sum(item.price for item in self.items.all())
+        total = 0
+        for item in self.items.all():
+            if item.currency == "usd":
+                total += item.price
+            elif item.currency == "eur":
+                total += item.price * Decimal("1.08")
         if self.discount:
             total -= total * self.discount.percent / 100
         if self.tax:

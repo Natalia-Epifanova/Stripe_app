@@ -10,11 +10,9 @@
     <h2>Items:</h2>
     <ul>
         {% for item in order.items.all %}
-        <li>{{ item.name }} - ${{ item.price }}</li>
+        <li>{{ item.name }} - {{ item.price }} {{ item.currency|upper }}</li>
         {% endfor %}
     </ul>
-
-    <p><strong>Subtotal: ${{ order.items_total }}</strong></p>
 
     {% if order.discount %}
     <p>Discount: {{ order.discount.name }} (-{{ order.discount.percent }}%)</p>
@@ -24,7 +22,7 @@
     <p>Tax: {{ order.tax.name }} (+{{ order.tax.percent }}%)</p>
     {% endif %}
 
-    <p><strong>Total: ${{ order.total_price }}</strong></p>
+    <p><strong>Total: {{ order.total_price }} {{ order.currency|upper }}</strong></p>
 
     <button id="buy-button">Pay Order</button>
 
