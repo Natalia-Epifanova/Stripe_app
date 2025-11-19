@@ -5,7 +5,7 @@ from stripe_app.models import Item, Order, Discount, Tax
 
 @admin.register(Item)
 class ItemAdmin(admin.ModelAdmin):
-    list_display = ["name", "price"]
+    list_display = ["name", "price", "currency"]
     search_fields = ["name"]
 
 
