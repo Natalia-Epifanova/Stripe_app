@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order #{{ order.id }}</title>
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+    <h1>Order #{{ order.id }}</h1>
+
+    <h2>Items:</h2>
+    <ul>
+        {% for item in order.items.all %}
+        <li>{{ item.name }} - ${{ item.price }}</li>
+        {% endfor %}
+    </ul>
+
+    <p><strong>Subtotal: ${{ order.items_total }}</strong></p>
+
+    {% if order.discount %}
+    <p>Discount: {{ order.discount.name }} (-{{ order.discount.percent }}%)</p>
+    {% endif %}
+
+    {% if order.tax %}
+    <p>Tax: {{ order.tax.name }} (+{{ order.tax.percent }}%)</p>
+    {% endif %}
+
+    <p><strong>Total: ${{ order.total_price }}</strong></p>
+
+    <button id="buy-button">Pay Order</button>
+
+    <script type="text/javascript">
+        var stripe = Stripe('{{ STRIPE_PUBLIC_KEY }}');
+        var buyButton = document.getElementById('buy-button');
+
+        buyButton.addEventListener('click', function() {
+            fetch('/stripe_app/order_buy/{{ order.id }}/', {method: 'GET'})
+            .then(response => response.json())
+            .then(session => {
+                return stripe.redirectToCheckout({ sessionId: session.sessionId });
+            })
+            .then(result => {
+                if (result.error) {
+                    alert(result.error.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
