@@ -49,10 +49,7 @@ def get_stripe_public_key(currency):
     Returns:
         str: Публичный ключ Stripe
     """
-    # 👇 ДОБАВЬ ОТЛАДКУ
-    keys = get_stripe_keys(currency)
-    public_key = keys["public"]
-    print(f"DEBUG: Currency: {currency}, Public Key: {public_key}")
+
     return get_stripe_keys(currency)["public"]
 
 
@@ -91,6 +88,7 @@ def create_stripe_coupon(discount_instance):
         str: ID созданного купона в Stripe или None в случае ошибки
     """
     try:
+        stripe.api_key = settings.STRIPE_SECRET_KEY_USD
         coupon = stripe.Coupon.create(
             duration="forever",
             percent_off=float(discount_instance.percent),
@@ -113,6 +111,7 @@ def create_stripe_tax(tax_instance):
         str: ID созданной налоговой ставки в Stripe или None в случае ошибки
     """
     try:
+        stripe.api_key = settings.STRIPE_SECRET_KEY_USD
         tax_rate = stripe.TaxRate.create(
             display_name=tax_instance.name,
             percentage=float(tax_instance.percent),
