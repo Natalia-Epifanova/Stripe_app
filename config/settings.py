@@ -1,5 +1,4 @@
 import os
-from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -16,7 +15,6 @@ STRIPE_SECRET_KEY_EUR = os.getenv("STRIPE_SECRET_KEY_EUR")
 
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
-
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
@@ -25,7 +23,6 @@ ALLOWED_HOSTS = [
     ".pythonanywhere.com",
     "NataliaYep.pythonanywhere.com",
 ]
-
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -67,32 +64,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# DATABASES ДЛЯ MYSQL
+# SQLite Database
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": os.getenv("MYSQL_DATABASE_NAME"),
-        "USER": os.getenv("MYSQL_DATABASE_USER"),
-        "PASSWORD": os.getenv("MYSQL_DATABASE_PASSWORD"),
-        "HOST": os.getenv("MYSQL_DATABASE_HOST"),
-        "PORT": os.getenv("MYSQL_DATABASE_PORT"),
-        "OPTIONS": {
-            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
-# DATABASES ДЛЯ POSTGRESQL
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": os.getenv("DATABASE_NAME"),
-#         "USER": os.getenv("DATABASE_USER"),
-#         "PASSWORD": os.getenv("DATABASE_PASSWORD"),
-#         "HOST": os.getenv("DATABASE_HOST", "db"),
-#         "PORT": os.getenv("DATABASE_PORT", "5432"),
-#     }
-# }
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -117,11 +95,9 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 STATIC_URL = "static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
